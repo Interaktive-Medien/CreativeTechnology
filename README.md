@@ -1,2 +1,2 @@
-# Creative-Technology
-Minor Creative Technology
+# Minor Creative-Technology
+Hier entstehen die Kursmaterialien
