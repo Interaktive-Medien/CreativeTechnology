@@ -12,9 +12,9 @@
 #include <WiFi.h>
 #include <MQTT.h>
 
-const char* ssid = "tinkergarden";             // @todo: add your wifi name
-const char* pass = "strenggeheim";             // @todo: add your wifi pw
-const char* broker = "192.168.0.102";          // @todo: add your broker ip address
+const char* ssid = "tinkergarden";              // @todo: add your wifi name "FRITZ!Box 6690 TA"
+const char* pass = "strenggeheim";              // @todo: add your wifi pw, "79854308499311013585"
+const char* broker = "192.168.178.49";          // "broker.emqx.io", "192.168.0.80"
 const char* subscribe_topics[] = {"from_td"};
 String publish_topic = "to_td";
 
