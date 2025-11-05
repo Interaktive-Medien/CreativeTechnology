@@ -19,8 +19,8 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 
-const char* ssid = "tinkergarden";             // @todo: add your wifi name
-const char* pass = "strenggeheim";             // @todo: add your wifi pw
+const char* ssid = "dreammakers";             // @todo: add your wifi name
+const char* pass = "dreammakers";             // @todo: add your wifi pw
 
 WiFiUDP Udp;                               
 const IPAddress remoteIp(192, 168, 0, 102);    // @todo: add receiver IP address
