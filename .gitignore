@@ -1,7 +1,7 @@
 Backup*
 *sftp.json
 *db_config.php
-*.mp4
+
 *.mov
 *2_Mediapipe*
 Kapitel 9 3D Mapping/PBR/.DS_Store
