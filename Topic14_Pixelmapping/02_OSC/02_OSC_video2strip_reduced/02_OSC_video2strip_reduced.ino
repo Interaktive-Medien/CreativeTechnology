@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Empfange Lichtdaten per OSC von z. B. TouchDesigner
+ * Empfange Lichtdaten per OSC von z. B. TouchDesigner (updated 10.04.2026)
  * LED-Ring zeigt Video, das in TouchDesigner für die LEDs portioniert wurde
  * Verbinde 12 WS2812B LEDs (z. B. LED-Ring) mit ESP32-C6:
  * WS2812B: Data in (Di)  <->  ESP32-C6: GPIO 2
@@ -8,7 +8,6 @@
  * installiere Libraries "OSC" by Adrian Freed und "Adafruit NeoPixel" by Adafruit
  * Ändere ssid, password, remote IP adress 
  ********************************************************************************/
-
 
 #include <Adafruit_NeoPixel.h>
 
@@ -19,10 +18,12 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 
-const char* ssid = "dreammakers";             // @todo: add your wifi name
-const char* pass = "dreammakers";             // @todo: add your wifi pw
+const char* ssid = "tinkergarden";             // @todo: add your wifi name
+const char* pass = "strenggeheim";             // @todo: add your wifi pw
+bool isWlanConnected = 0;
+int led = LED_BUILTIN;
 
-WiFiUDP Udp;                               
+WiFiUDP Udp;                                   
 const unsigned int remotePort = 9000;          
 const unsigned int localPort = 8000;        
 
@@ -35,11 +36,22 @@ Adafruit_NeoPixel strip(num_leds, stripPin, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   Serial.begin(115200);
+  delay(1000);
+  rgbLedWrite(led, 0, 255, 0);    // GRB rot
   connectWiFi();
   connectUdp();
   setupStrip();
 }
 
+
+void loop() {
+  // Nur wenn die Verbindung steht, wird der Rest ausgeführt
+  if (!is_wlan_connected()) {
+    return; 
+  }
+
+  receiveOSC_StripData();   
+}
 
 ///////////////////////////////////////////////// WiFi & UDP (OSC)
 
@@ -51,6 +63,22 @@ void connectWiFi() {
     Serial.print(".");
   }
   Serial.printf("WiFi connected: SSID: %s, IP Address: %s\n", ssid, WiFi.localIP().toString().c_str());
+}
+
+
+bool is_wlan_connected(){
+  // 1. Fall: Überhaupt keine Hardware-Verbindung
+  if (WiFi.status() != WL_CONNECTED) {
+    if (isWlanConnected == 1) { // War vorher verbunden?
+      Serial.println("WiFi-Verbindung verloren, reconnect...");
+      rgbLedWrite(led, 0, 255, 0);  // Status: Rot
+      isWlanConnected = 0;
+    }
+    connectWiFi(); 
+    return false; // Loop wird abgebrochen
+  }
+  
+  return true; // WiFi ist da, Loop darf weiterlaufen
 }
 
 void connectUdp() {
@@ -66,9 +94,7 @@ void setupStrip(){
   strip.setBrightness(255); 
 }
 
-void loop() {
-  receiveOSC_StripData();   
-}
+
 
 void receiveOSC_StripData(){
   OSCBundle bundle;
