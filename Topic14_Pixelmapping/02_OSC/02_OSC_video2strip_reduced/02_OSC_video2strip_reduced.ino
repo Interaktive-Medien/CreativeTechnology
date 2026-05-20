@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Empfange Lichtdaten per OSC von z. B. TouchDesigner (updated 10.04.2026)
+ * Empfange Lichtdaten per OSC von z. B. TouchDesigner (updated 18.05.2026)
  * LED-Ring zeigt Video, das in TouchDesigner für die LEDs portioniert wurde
  * Verbinde 12 WS2812B LEDs (z. B. LED-Ring) mit ESP32-C6:
  * WS2812B: Data in (Di)  <->  ESP32-C6: GPIO 2
@@ -16,7 +16,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <OSCMessage.h>
-#include <OSCBundle.h>
+// #include <OSCBundle.h>
 
 const char* ssid = "tinkergarden";             // @todo: add your wifi name
 const char* pass = "strenggeheim";             // @todo: add your wifi pw
@@ -63,6 +63,7 @@ void connectWiFi() {
     Serial.print(".");
   }
   Serial.printf("WiFi connected: SSID: %s, IP Address: %s\n", ssid, WiFi.localIP().toString().c_str());
+  rgbLedWrite(led, 255, 0, 0);  // Status: Rot
 }
 
 
@@ -94,35 +95,22 @@ void setupStrip(){
   strip.setBrightness(255); 
 }
 
-
-
 void receiveOSC_StripData(){
-  OSCBundle bundle;
   int size = Udp.parsePacket();
 
   if (size > 0) {
+    OSCMessage msg;
     while (size--) {
-      bundle.fill(Udp.read());
+      msg.fill(Udp.read());
     }
-    if (!bundle.hasError()) {
-      for (int i = 0; i < bundle.size(); i++) {
-        OSCMessage msg = bundle.getOSCMessage(i);
 
-        // Serial.println("Empfangen: " + String(msg.getAddress()));   // testen ob überhaupt irgendetwas ankommt
-
-        ////////////////// bestimmten OSC key empfangen und Aktion auslösen
-        if (strcmp(msg.getAddress(), "/colors") == 0) {
-
-          /////////// drive strip from OSC message
-          for(int i=0; i < num_leds; i++) {
-            strip.setPixelColor(i, msg.getInt(i*3), msg.getInt((i*3)+1), msg.getInt((i*3)+2));
-          }
-          strip.show(); // Update strip with new contents
-          delay(15);   
+    if (!msg.hasError()) {
+      if (strcmp(msg.getAddress(), "/colors") == 0) {
+        for(int i = 0; i < num_leds; i++) {
+          strip.setPixelColor(i, msg.getInt(i*3), msg.getInt((i*3)+1), msg.getInt((i*3)+2));
         }
+        strip.show();
       }
-    } else {
-      // Serial.println("error: " + String(bundle.getError()));
     }
   }
 }
